@@ -620,8 +620,9 @@ class NpECGDataset(RawECGDataset):
     def __getitem__(self, index):
         res = {'id': index}
 
-        _, xdata = npy_load(data=self.xdata, filename=self.ecg_file)
-        x = xdata[index]
+        if not hasattr(self, '_xdata_cache'):
+            _, self._xdata_cache = npy_load(data=None, filename=self.ecg_file)
+        x = self._xdata_cache[index]
         x = npy_tensor(x,)
 
         curr_sample_rate = self.sample_rate
@@ -631,9 +632,10 @@ class NpECGDataset(RawECGDataset):
             res["original"] = feats
 
         if self.label:
-            _, ydata = npy_load(data=self.ydata, filename=self.label_file)
-            res["label"] = torch.from_numpy(ydata[index, self.label_indexes])
-        
+            if not hasattr(self, '_ydata_cache'):
+                _, self._ydata_cache = npy_load(data=None, filename=self.label_file)
+            res["label"] = torch.from_numpy(self._ydata_cache[index, self.label_indexes])
+
         return res
 
     def __len__(self):
