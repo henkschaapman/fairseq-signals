@@ -1,14 +1,14 @@
 
 common:
-  #fp16: true #false
+  fp16: false
   log_format: json
   log_interval: 10
   all_gather_list_size: 2048000
-  #wandb_entity: ecg-pretraining
-  wandb_project: diagnosis-prediction
+  wandb_entity: ecg-explainability
+  wandb_project: finetune_wcr_afib5y
 
 checkpoint:
-  save_dir: checkpoints
+  save_dir: output_weights
   # best_checkpoint_metric: cinc_score
   # maximize_best_checkpoint_metric: true
   save_interval: 1
@@ -19,8 +19,8 @@ checkpoint:
 
 task:
   _name: ecg_classification
-  data: ???
-  #npy_dataset: true
+  data: /app/data/data_location
+  npy_dataset: true
   #df_dataset: true
   normalize: false
   enable_padding: true
@@ -29,9 +29,9 @@ task:
     # I, II, III, aVR, aVL, aVF, V1, V2, V3, V4, V5, V6
 
 dataset:
-  num_workers: 6
-  max_tokens: null 
-  batch_size: 128
+  num_workers: 21
+  max_tokens: null
+  batch_size: 64 #128
   valid_subset: "valid"
 
 distributed_training:
@@ -41,12 +41,13 @@ criterion:
   _name: binary_cross_entropy_with_logits
   report_auc: true
   report_cinc_score: false
-  weights_file: ???
+  weights_file: /app/weights/wcr_afib_5y.pt
 
 optimization:
   max_epoch: 100
   max_update: 32000000 #320000
   lr: [0.00005]
+  update_freq: [2]
 
 optimizer:
   _name: adam
