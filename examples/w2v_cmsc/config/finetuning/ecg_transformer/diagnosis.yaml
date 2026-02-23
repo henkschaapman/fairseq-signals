@@ -77,7 +77,7 @@ optimizer:
 lr_scheduler:
   _name: two_phase_plateau
   phase1_updates: 5000         # ~10 epochs at 485 updates/epoch
-  phase1_warmup_updates: 100
+  phase1_warmup_updates: 1000
   phase1_lr: 0.0001            # 10× backbone LR — head is random so can take more
   phase1_patience: 5
   phase2_warmup_updates: 1000
