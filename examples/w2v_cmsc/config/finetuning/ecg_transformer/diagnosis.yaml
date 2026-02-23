@@ -15,7 +15,7 @@ checkpoint:
   keep_last_epochs: 1
   save_interval_updates: 0
   no_epoch_checkpoints: false
-  patience: 30
+  patience: 20
 
 task:
   _name: ecg_classification
@@ -76,8 +76,8 @@ optimizer:
 
 lr_scheduler:
   _name: two_phase_plateau
-  phase1_updates: 5000         # ~10 epochs at 485 updates/epoch
-  phase1_warmup_updates: 1000
+  phase1_updates: 5000         # ~10 epochs at 485 updates/epoch !! needs to match freeze_finetune_updates !!
+  phase1_warmup_updates: 500
   phase1_lr: 0.0001            # 10× backbone LR — head is random so can take more
   phase1_patience: 5
   phase2_warmup_updates: 1000
@@ -99,6 +99,6 @@ model:
   # encoder_layerdrop: 0.1
 
   feature_grad_mult: 0.0
-  freeze_finetune_updates: 2000
+  freeze_finetune_updates: 5000 # !! needs to match phase1_updates !!
   linear_evaluation: 
   in_d: 12
