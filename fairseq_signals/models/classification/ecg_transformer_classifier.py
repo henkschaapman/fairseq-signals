@@ -28,6 +28,9 @@ class ECGTransformerClassificationModel(ECGTransformerFinetuningModel):
         self.proj = nn.Linear(cfg.encoder_embed_dim, cfg.num_labels)
         nn.init.xavier_uniform_(self.proj.weight)
         nn.init.constant_(self.proj.bias, 0.0)
+        # tag head params so two_phase_plateau scheduler can split into a separate group
+        for p in self.proj.parameters():
+            p._is_head = True
 
         print('#'*10, cfg)
 

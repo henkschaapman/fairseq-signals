@@ -82,6 +82,7 @@ lr_scheduler:
   phase1_patience: 3
   phase2_warmup_updates: 1000
   phase2_patience: 5
+  phase2_head_lr: 0.0001       # head keeps higher LR in Phase 2, -1 means same as backbone
   lr_shrink: 0.5
   min_lr: 0.000001
   maximize: false
