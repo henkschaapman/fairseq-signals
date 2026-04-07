@@ -1,6 +1,6 @@
 
 common:
-  fp16: true
+  fp16: false
   log_format: json
   log_interval: 10
   all_gather_list_size: 2048000
