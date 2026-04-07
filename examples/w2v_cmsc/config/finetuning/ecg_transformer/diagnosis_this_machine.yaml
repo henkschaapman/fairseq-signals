@@ -1,0 +1,105 @@
+
+common:
+  fp16: false
+  log_format: json
+  log_interval: 10
+  all_gather_list_size: 2048000
+  wandb_entity: ecg-explainability
+  wandb_project: finetune_wcr_afib5y
+
+checkpoint:
+  save_dir: output_weights
+  # best_checkpoint_metric: cinc_score
+  # maximize_best_checkpoint_metric: true
+  save_interval: 1
+  keep_last_epochs: 1
+  save_interval_updates: 0
+  no_epoch_checkpoints: false
+  patience: 20
+
+task:
+  _name: ecg_classification
+  data: /app/data/data_location
+  npy_dataset: true
+  #df_dataset: true
+  normalize: false
+  enable_padding: true
+  enable_padding_leads: false
+  leads_to_load: null
+    # I, II, III, aVR, aVL, aVF, V1, V2, V3, V4, V5, V6
+
+dataset:
+  num_workers: 8
+  max_tokens: null
+  batch_size: 64 #128
+  valid_subset: "valid"
+
+distributed_training:
+  distributed_world_size: 1
+
+criterion:
+  _name: binary_cross_entropy_with_logits
+  report_auc: true
+  report_cinc_score: false
+  weights_file: ???
+
+optimization:
+  max_epoch: 100
+  max_update: 32000000 #320000
+  lr: [0.00002]
+  update_freq: [2]
+
+# lr_scheduler:
+#   _name: tri_stage
+#   warmup_steps: 2000     # 10% of 48500 (with batch_size=64 and update_freq=2, 48500updates=100epochs)
+#   hold_steps: 10000      # 40%
+#   decay_steps: 24250     # 50%
+#   init_lr_scale: 0.01     # warmup starts at 5e-7  (1% of peak)
+#   final_lr_scale: 0.1     # decay floors at 5e-6  (10% of peak)
+
+optimizer:
+  _name: adam
+  adam_betas: (0.9, 0.98)
+  adam_eps: 1e-08
+  weight_decay: 0.01
+
+
+# lr_scheduler:
+#   _name: reduce_on_plateau
+#   warmup_updates: 3500    # 
+#   warmup_init_lr: -1      # start from min_lr
+#   patience_epochs: 10     # reduce LR after 10 epochs of no improvement
+#   lr_shrink: 0.5          # halve the LR on plateau
+#   min_lr: 0.000001        # floor at 1e-6
+#   maximize: false         # monitoring val loss (lower is better)
+#   threshold: 0.001        # require 0.1% relative improvement to reset patience
+
+lr_scheduler:
+  _name: two_phase_plateau
+  phase1_updates: 5000         # ~10 epochs at 485 updates/epoch !! needs to match freeze_finetune_updates !!
+  phase1_warmup_updates: 1500
+  phase1_lr: 0.00008            # 10× backbone LR — head is random so can take more
+  phase1_patience: 3
+  phase2_warmup_updates: 000
+  phase2_patience: 5
+  phase2_head_lr: 0.00008       # head keeps higher LR in Phase 2, -1 means same as backbone
+  lr_shrink: 0.3
+  min_lr: 0.000001
+  maximize: false
+  threshold: 0.001
+
+model:
+  _name: ecg_transformer_classifier
+  model_path: /app/weights/wcr_afib_5y.pt
+  num_labels: 
+  no_pretrained_weights: false
+
+  dropout: 0.1
+  attention_dropout: 0.1
+  activation_dropout: 0.1
+  # encoder_layerdrop: 0.1
+
+  feature_grad_mult: 0.0
+  freeze_finetune_updates: 5000 # !! needs to match phase1_updates !!
+  linear_evaluation: 
+  in_d: 12

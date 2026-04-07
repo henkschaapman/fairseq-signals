@@ -243,6 +243,15 @@ class TransformerModel(PretrainingModel):
             args = convert_namespace_to_omegaconf(state["args"])
         args.criterion = None
         args.lr_scheduler = None
+
+        # Clear model_path in the loaded config to prevent recursive loading
+        # of another checkpoint (the saved config may reference a path from the
+        # original training environment that no longer exists).
+        if hasattr(args, "model") and hasattr(args.model, "model_path"):
+            from omegaconf import open_dict
+            with open_dict(args):
+                args.model.model_path = None
+
         cfg.args = args
 
         assert cfg.normalize == args.task.normalize, (
