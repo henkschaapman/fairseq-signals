@@ -29,7 +29,7 @@ task:
     # I, II, III, aVR, aVL, aVF, V1, V2, V3, V4, V5, V6
 
 dataset:
-  num_workers: 20
+  num_workers: 8
   max_tokens: null
   batch_size: 64 #128
   valid_subset: "valid"
@@ -46,9 +46,8 @@ criterion:
 optimization:
   max_epoch: 100
   max_update: 32000000 #320000
-  lr: [0.00002]
+  lr: [0.00001]
   update_freq: [2]
-  clip_norm: 1.0
 
 # lr_scheduler:
 #   _name: tri_stage
@@ -77,11 +76,11 @@ optimizer:
 
 lr_scheduler:
   _name: two_phase_plateau
-  phase1_updates: 5000         # ~10 epochs at 485 updates/epoch !! needs to match freeze_finetune_updates !!
-  phase1_warmup_updates: 500
+  phase1_updates: 1         # ~10 epochs at 485 updates/epoch !! needs to match freeze_finetune_updates !!
+  phase1_warmup_updates: 1
   phase1_lr: 0.0001            # 10× backbone LR — head is random so can take more
   phase1_patience: 3
-  phase2_warmup_updates: 1000
+  phase2_warmup_updates: 500
   phase2_patience: 5
   phase2_head_lr: 0.0001       # head keeps higher LR in Phase 2, -1 means same as backbone
   lr_shrink: 0.5
@@ -101,6 +100,6 @@ model:
   # encoder_layerdrop: 0.1
 
   feature_grad_mult: 0.0
-  freeze_finetune_updates: 5000 # !! needs to match phase1_updates !!
+  freeze_finetune_updates: 1 # !! needs to match phase1_updates !!
   linear_evaluation: 
   in_d: 12
