@@ -74,19 +74,29 @@ optimizer:
 #   maximize: false         # monitoring val loss (lower is better)
 #   threshold: 0.001        # require 0.1% relative improvement to reset patience
 
+# lr_scheduler:  # two_phase_plateau (disabled — phase 1 freezing was not useful)
+#   _name: two_phase_plateau
+#   phase1_updates: 1
+#   phase1_warmup_updates: 1
+#   phase1_lr: 0.0001
+#   phase1_patience: 3
+#   phase2_warmup_updates: 500
+#   phase2_patience: 5
+#   phase2_head_lr: 0.0001
+#   lr_shrink: 0.5
+#   min_lr: 0.000001
+#   maximize: false
+#   threshold: 0.001
+
 lr_scheduler:
-  _name: two_phase_plateau
-  phase1_updates: 1         # ~10 epochs at 485 updates/epoch !! needs to match freeze_finetune_updates !!
-  phase1_warmup_updates: 1
-  phase1_lr: 0.0001            # 10× backbone LR — head is random so can take more
-  phase1_patience: 3
-  phase2_warmup_updates: 500
-  phase2_patience: 5
-  phase2_head_lr: 0.0001       # head keeps higher LR in Phase 2, -1 means same as backbone
-  lr_shrink: 0.5
-  min_lr: 0.000001
-  maximize: false
-  threshold: 0.001
+  _name: dual_lr_plateau
+  warmup_updates: 500       # backbone ramps min_lr → 1e-5 over 500 steps; head starts at head_lr immediately
+  head_lr: 0.0001           # 10x backbone LR — head is randomly initialized
+  patience_epochs: 5        # reduce after 5 epochs with no improvement
+  lr_shrink: 0.5            # halve both LRs on plateau
+  min_lr: 0.000001          # floor at 1e-6
+  maximize: false           # monitoring val loss (lower is better)
+  threshold: 0.001          # require 0.1% relative improvement to reset patience
 
 model:
   _name: ecg_transformer_classifier
@@ -100,6 +110,7 @@ model:
   # encoder_layerdrop: 0.1
 
   feature_grad_mult: 0.0
-  freeze_finetune_updates: 1 # !! needs to match phase1_updates !!
+  # freeze_finetune_updates: 1 # !! needs to match phase1_updates !!
+  freeze_finetune_updates: 0 # not used now with dual_lr_plateau
   linear_evaluation: 
   in_d: 12
