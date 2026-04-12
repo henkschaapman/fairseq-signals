@@ -9,7 +9,7 @@ common:
 
 checkpoint:
   save_dir: output_weights
-  # best_checkpoint_metric: cinc_score
+  best_checkpoint_metric: auc # NOTE maximize: parameter!
   # maximize_best_checkpoint_metric: true
   save_interval: 1
   keep_last_epochs: 1
@@ -46,7 +46,7 @@ criterion:
 optimization:
   max_epoch: 100
   max_update: 32000000 #320000
-  lr: [0.00001]
+  lr: [0.000005]
   update_freq: [2]
 
 # lr_scheduler:
@@ -91,11 +91,11 @@ optimizer:
 lr_scheduler:
   _name: dual_lr_plateau
   warmup_updates: 500       # backbone ramps min_lr → 1e-5 over 500 steps; head starts at head_lr immediately
-  head_lr: 0.0001           # 10x backbone LR — head is randomly initialized
-  patience_epochs: 5        # reduce after 5 epochs with no improvement
-  lr_shrink: 0.5            # halve both LRs on plateau
+  head_lr: 0.00005           # 10x backbone LR — head is randomly initialized
+  patience_epochs: 2        # reduce after 5 epochs with no improvement
+  lr_shrink: 0.4            # halve both LRs on plateau
   min_lr: 0.000001          # floor at 1e-6
-  maximize: false           # monitoring val loss (lower is better)
+  maximize: true           # monitoring val loss (lower is better)
   threshold: 0.001          # require 0.1% relative improvement to reset patience
 
 model:
